@@ -1,65 +1,199 @@
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { client } from "@/sanity/client";
+import { categoriesQuery, homeArticlesQuery } from "@/lib/queries";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url";
 
-export default function Home() {
+const { projectId, dataset } = client.config();
+const urlFor = (source: SanityImageSource) =>
+  projectId && dataset
+    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    : null;
+
+async function getCategories() {
+  return await client.fetch(categoriesQuery);
+}
+
+async function getArticles(page = 1, limit = 8) {
+  const start = (page - 1) * limit;
+  const end = start + limit;
+
+  return await client.fetch(homeArticlesQuery, {
+    start,
+    end,
+  });
+}
+
+export default async function Home({ searchParams }: any) {
+  const page = Number(searchParams?.page || 1);
+
+  const categories = await getCategories();
+  const articles = await getArticles(page, 8);
+
+  const cardColors = [
+    "bg-emerald-50",
+    "bg-slate-50",
+    "bg-emerald-50",
+    "bg-slate-50"
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="flex flex-col gap-16 pb-16">
+      
+      {/* SECTION HERO : Le mot-clé principal dans le H1 */}
+      <section className="container mx-auto px-4 pt-12 md:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center border-slate-100">
+          <div className="space-y-6">
+            <span className="text-emerald-600 font-bold uppercase tracking-widest text-sm">
+              Expertise Santé Vertébrale
+            </span>
+            <h1 className="text-5xl md:text-7xl font-black leading-[0.9] tracking-tighter uppercase italic">
+              Soulager votre <br /> 
+              <span className="text-emerald-600 italic">Mal de Dos</span> <br /> 
+              naturellement.
+            </h1>
+            <p className="text-lg text-slate-600 max-w-lg leading-relaxed font-medium">
+              Découvrez des guides complets sur la <strong>posture</strong>, les <strong>remèdes naturels</strong> et des exercices ciblés pour dire adieu aux douleurs lombaires et cervicales.
+            </p>
+            <Button className="rounded-none bg-black hover:bg-emerald-600 h-14 px-10 text-lg font-bold uppercase transition-all">
+              Lire les derniers conseils
+            </Button>
+          </div>
+          
+          <div className="relative aspect-[4/5] w-full bg-slate-100 overflow-hidden">
+            {/* Ici tu mettras l'image de ton article principal depuis Sanity */}
+            <div className="absolute inset-0 flex items-center justify-center text-slate-300 font-bold uppercase tracking-widest italic">
+              Image à la Une
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION DERNIERS ARTICLES : Boost SEO & Engagement */}
+      <section className="container mx-auto px-4 md:px-8 border-t pt-16 border-slate-100">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black uppercase tracking-tighter italic">
+              Dernières <span className="text-emerald-600">Actualités Santé</span>
+            </h2>
+            <p className="text-slate-500 text-sm font-medium">Nos conseils récents pour prendre soin de votre colonne vertébrale.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {articles.map((post: any) => {
+            const postImg = post.mainImage ? urlFor(post.mainImage) : null;
+            return (
+            <article key={post.slug} className="group cursor-pointer">
+
+              <div className="relative aspect-video mb-4 overflow-hidden bg-slate-100">
+                <div className="absolute inset-0 flex items-center justify-center text-[10px] text-slate-300 uppercase font-bold">
+                  {postImg && (
+                    <Image
+                        src={postImg.width(800).auto("format").url()}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                  )}
+                </div>
+
+                <div className="absolute top-0 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-tighter">
+                  {post.cate}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-bold text-lg leading-tight group-hover:text-emerald-600 transition-colors uppercase tracking-tight">
+                  {post.title}
+                </h3>
+
+                <p className="text-sm text-slate-500 line-clamp-2">
+                  {post.excerpt}
+                </p>
+
+                <div className="pt-2 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <span>
+                    {new Date(post.publishedAt).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"})}
+                  </span>
+                  <span className="mx-2">•</span>
+                  <span>{post.readingTime} min de lecture</span>
+                </div>
+              </div>
+
+            </article>
+          )})}
+        </div>
+        <div className="flex justify-center gap-4 mt-12">
+          {page > 1 && (
+            <Link
+              href={`/?page=${page - 1}`}
+              className="px-6 py-2 border font-bold uppercase"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Previous
+            </Link>
+          )}
+          <Link
+            href={`/?page=${page + 1}`}
+            className="px-6 py-2 border font-bold uppercase"
+          >
+            Next
+          </Link>
+        </div>
+      </section>
+
+      {/* SECTION CATÉGORIES : Pour le maillage interne SEO */}
+      <section className="container mx-auto px-4 md:px-8">
+        <div className="flex justify-between items-end mb-8 border-b-2 border-black pb-2">
+          <h2 className="text-3xl font-black uppercase tracking-tighter italic">Nos piliers de santé</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {categories.map((cat : any, i: number) => (
+            <Link 
+              key={cat.slug} 
+              href={`/${cat.slug}`}
+              className={`${cardColors[i]} p-8 border border-slate-100 hover:border-emerald-200 transition-all group cursor-pointer`}>
+              <h3 className="font-black uppercase text-xl mb-2 group-hover:text-emerald-600">{cat.title}</h3>
+              <p className="text-sm text-slate-500 mb-6">{cat.headline}</p>
+              <div className="mt-4 flex items-center text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-emerald-500">
+                Découvrir les {cat.count} articles 
+                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION "WHY US" : Pour le score de confiance Google (EEAT) */}
+      <section className="bg-black text-white py-20">
+        <div className="container mx-auto px-4 md:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-6 italic">
+            Pourquoi faire confiance à <span className="text-emerald-500">Dos Sans Douleur</span> ?
+          </h2>
+          <p className="max-w-2xl mx-auto text-slate-400 text-lg mb-10 italic">
+            "Notre mission est de vulgariser les études scientifiques sur la colonne vertébrale pour vous offrir des solutions concrètes et simples à appliquer chez vous."
           </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-4">
+              <div className="text-3xl font-black text-emerald-500 mb-2">100%</div>
+              <p className="text-xs uppercase font-bold tracking-widest">Conseils Naturels</p>
+            </div>
+            <div className="p-4">
+              <div className="text-3xl font-black text-emerald-500 mb-2">+50</div>
+              <p className="text-xs uppercase font-bold tracking-widest">Exercices Vidéo</p>
+            </div>
+            <div className="p-4">
+              <div className="text-3xl font-black text-emerald-500 mb-2">Expert</div>
+              <p className="text-xs uppercase font-bold tracking-widest">Contenu Vérifié</p>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </section>
     </div>
   );
 }
