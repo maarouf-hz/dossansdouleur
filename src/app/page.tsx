@@ -242,7 +242,7 @@ export default async function Home({ searchParams }: any) {
             <div className="p-4">
               <div className="text-3xl font-black text-emerald-500 mb-2">+50</div>
               <p className="text-xs uppercase font-bold tracking-widest">
-                Exercices Vidéo
+                Exercices
               </p>
             </div>
             <div className="p-4">
