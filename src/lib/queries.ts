@@ -33,11 +33,15 @@ export const POST_QUERY = defineQuery(`
   }
 `);
 
+export const categoryPostsCountQuery = defineQuery(
+  `count(*[_type == "post" && references(*[_type == "category" && slug.current == $categorySlug][0]._id)])`
+)
+
 export const CATEGORY_QUERY = `*[_type == "category" && slug.current == $categorySlug][0] {
   title,
   headline,
   description,
-  "posts": *[_type == "post" && references(^._id)] | order(publishedAt desc){
+  "posts": *[_type == "post" && references(^._id)] | order(publishedAt desc)[$start...$end]{
     title,
     "slug": slug.current,
     mainImage,

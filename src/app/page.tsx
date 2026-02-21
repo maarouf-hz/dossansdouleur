@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { client } from "@/sanity/client";
 import { categoriesQuery, heroImageQuery, homeArticlesQuery } from "@/lib/queries";
 import imageUrlBuilder, { SanityImageSource } from "@sanity/image-url";
 import { HeroImageContent } from "@/components/ui/hero-image-content";
+import { redirect } from "next/navigation";
 
 const { projectId, dataset } = client.config();
 const urlFor = (source: SanityImageSource) =>
@@ -22,13 +22,16 @@ async function getHeroImage() {
 
 async function getArticles(page = 1, limit = 8) {
   const start = (page - 1) * limit;
-  const end = start + limit;
+  const end = start + limit +1;
   return await client.fetch(homeArticlesQuery, { start, end });
 }
 
 export default async function Home({ searchParams }: any) {
-  const page = Number(searchParams?.page || 1);
-
+  const resolvedSearchParams = await searchParams;
+  const page = Number(resolvedSearchParams?.page || 1);
+  if (page === 1 && resolvedSearchParams?.page !== undefined) {
+    redirect("/");
+  }
   const [heroData, categories, articles] = await Promise.all([
     getHeroImage(),
     getCategories(),
@@ -48,7 +51,8 @@ export default async function Home({ searchParams }: any) {
   ];
 
   // Pagination: hide "Next" if fewer than 8 articles returned (last page)
-  const hasNextPage = articles.length === 8;
+  const hasNextPage = articles.length > 8;
+  const displayedArticles = articles.slice(0, 8);
 
   return (
     <div className="flex flex-col gap-16 pb-16">
@@ -112,7 +116,7 @@ export default async function Home({ searchParams }: any) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {articles.map((post: any) => {
+          {displayedArticles.map((post: any) => {
             const postImg = post.mainImage ? urlFor(post.mainImage) : null;
             return (
               <article key={post.slug} className="group cursor-pointer">

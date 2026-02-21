@@ -77,6 +77,44 @@ export default async function PostPage({
 
         {Array.isArray(post.body) && <PortableText value={post.body} />}
       </article>
+      {/* DISCLAIMER */}
+      <div className="mt-16 border-l-4 border-amber-400 bg-amber-50 p-6">
+        <p className="text-xs font-black uppercase tracking-widest text-amber-700 mb-2">
+          ⚠️ Avertissement médical
+        </p>
+        <p className="text-sm text-amber-800 leading-relaxed">
+          Les informations contenues dans cet article sont fournies à titre informatif et éducatif uniquement. 
+          Elles ne constituent pas un avis médical et ne remplacent en aucun cas une consultation avec un 
+          professionnel de santé qualifié (médecin, kinésithérapeute, ostéopathe). En cas de douleur 
+          persistante ou intense, consultez un médecin avant d'entreprendre tout exercice ou traitement.
+        </p>
+      </div>
+
+      {/* SOURCES */}
+      {post.references?.length > 0 && (
+        <div className="mt-8 border-t border-slate-100 pt-8">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+            Sources & Références
+          </h2>
+          <ul className="space-y-2">
+            {post.references.map((ref: any, i: number) => (
+              <li key={i} className="text-sm text-slate-500">
+                <Link
+                  href={ref.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-emerald-600 underline underline-offset-2"
+                >
+                  {ref.title}
+                </Link>
+                <span className="ml-2 text-slate-400">
+                  — {ref.source}{ref.publishedYear ? `, ${ref.publishedYear}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }
