@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     default: "Dos Sans Douleur | Guide Expert de la Santé Vertébrale",
     template: "%s | Dos Sans Douleur"
   },
-  description: "Solutions naturelles et exercices thérapeutiques pour soigner le mal de dos. Apprenez à corriger votre posture et soulager vos lombaires avec nos guides validés par des experts.",
+  description: "Solutions naturelles et exercices pour soigner le mal de dos. Corrigez votre posture et soulagez vos lombaires avec nos guides validés par des experts.",
   keywords: [
     "soulager mal de dos", 
     "exercices lombaires", 
