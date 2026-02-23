@@ -14,13 +14,11 @@ COPY . .
 
 # 5. Environment Variables
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV HOSTNAME="0.0.0.0"
+# Ensure the dev server binds to 0.0.0.0 so you can access it outside the container
+ENV HOSTNAME="0.0.0.0" 
 ENV PORT=3000
 
-# 6. Build the Next.js app
-RUN npm run build
-
-# 7. Expose the port
+# 6. Expose the port for documentation
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
