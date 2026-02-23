@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,10 +37,10 @@ export async function POST(req: NextRequest) {
       autre: "Autre",
     };
 
-    const { error } = await resend.emails.send({
-      from: "Contact Dos Sans Douleur <contact@dossansdouleur.com>",
-      to: [process.env.RESEND_TO_EMAIL!],
-      replyTo: email, // ← répondre directement à l'expéditeur
+    await transporter.sendMail({
+      from: `"Contact Dos Sans Douleur" <${process.env.SMTP_USER}>`,
+      to: process.env.SMTP_TO,
+      replyTo: email,
       subject: `[Contact] ${sujetLabels[sujet] ?? sujet} — ${nom}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0;">
@@ -84,14 +92,6 @@ export async function POST(req: NextRequest) {
         </div>
       `,
     });
-
-    if (error) {
-      console.error("Resend error:", error);
-      return NextResponse.json(
-        { message: "Erreur lors de l'envoi. Réessayez." },
-        { status: 500 }
-      );
-    }
 
     return NextResponse.json(
       { message: "Message envoyé avec succès !" },
