@@ -5,6 +5,11 @@ import { categoriesQuery, heroImageQuery, homeArticlesQuery } from "@/lib/querie
 import imageUrlBuilder, { SanityImageSource } from "@sanity/image-url";
 import { HeroImageContent } from "@/components/ui/hero-image-content";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "https://dossansdouleur.com" },
+};
 
 const { projectId, dataset } = client.config();
 const urlFor = (source: SanityImageSource) =>
@@ -119,42 +124,48 @@ export default async function Home({ searchParams }: any) {
           {displayedArticles.map((post: any) => {
             const postImg = post.mainImage ? urlFor(post.mainImage) : null;
             return (
-              <article key={post.slug} className="group cursor-pointer">
-                <div className="relative aspect-video mb-4 overflow-hidden bg-slate-100">
-                  {postImg && (
-                    <Image
-                      src={postImg.width(800).auto("format").url()}
-                      alt={post.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
-                    />
-                  )}
-                  <div className="absolute top-0 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-tighter">
-                    {post.cate}
+              <Link
+                key={post.slug}
+                 href={`/${post.categorySlug}/${post.slug}`}
+                className="group cursor-pointer block"
+              >
+                <article className="">
+                  <div className="relative aspect-video mb-4 overflow-hidden bg-slate-100">
+                    {postImg && (
+                      <Image
+                        src={postImg.width(800).auto("format").url()}
+                        alt={post.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                    )}
+                    <div className="absolute top-0 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-tighter">
+                      {post.cate}
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <h3 className="font-bold text-lg leading-tight group-hover:text-emerald-600 transition-colors uppercase tracking-tight">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-slate-500 line-clamp-2">
-                    {post.excerpt}
-                  </p>
-                  <div className="pt-2 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                    <span>
-                      {new Date(post.publishedAt).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span>{post.readingTime} min de lecture</span>
+                  <div className="space-y-2">
+                    <h3 className="font-bold text-lg leading-tight group-hover:text-emerald-600 transition-colors uppercase tracking-tight">
+                      {post.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 line-clamp-2">
+                      {post.excerpt}
+                    </p>
+                    <div className="pt-2 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <span>
+                        {new Date(post.publishedAt).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <span className="mx-2">•</span>
+                      <span>{post.readingTime} min de lecture</span>
+                    </div>
                   </div>
-                </div>
-              </article>
+                </article>
+              </Link>
             );
           })}
         </div>

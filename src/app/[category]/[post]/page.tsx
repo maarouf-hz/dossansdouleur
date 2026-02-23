@@ -5,6 +5,25 @@ import Image from "next/image";
 import { PortableText } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url";
+import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/JsonLd";
+import { generateArticleMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: {params: Promise<{ category: string; post: string }>}) {
+  const { post: slug, category } = await params;
+  const post = await client.fetch(POST_QUERY, { slug });
+
+  const postImg = post.mainImage ? urlFor(post.mainImage)?.width(1200).height(630).url() : undefined;
+
+  return generateArticleMetadata({
+    title: post.title,
+    description: post.excerpt,
+    publishedAt: post.publishedAt,
+    updatedAt: post._updatedAt,
+    imageUrl: postImg ?? undefined,
+    categorySlug: category,
+    slug,
+  });
+}
 
 const { projectId, dataset } = client.config();
 
@@ -36,11 +55,27 @@ export default async function PostPage({
     { next: { revalidate: 60 } }
   );
 
-  // ✅ IMAGE BUILDER (your requested version)
   const postImg = post.mainImage ? urlFor(post.mainImage) : null;
 
   return (
     <main className="container mx-auto min-h-screen max-w-4xl p-8 pt-20">
+      {/* Schemas JSON-LD */}
+      <ArticleSchema
+        title={post.title}
+        excerpt={post.excerpt}
+        publishedAt={post.publishedAt}
+        updatedAt={post._updatedAt}
+        imageUrl={postImg?.width(1200).height(675).url()}
+        slug={slug}
+        categorySlug={category}
+        readingTime={post.readingTime}
+      />
+      <BreadcrumbSchema
+        items={[
+          { name: category, url: `https://dossansdouleur.com/${category}` },
+          { name: post.title, url: `https://dossansdouleur.com/${category}/${slug}` },
+        ]}
+      />
       <nav className="mb-8 text-xs font-black uppercase tracking-widest text-emerald-600">
         <Link href="/">Accueil</Link>
         <span className="mx-2 text-slate-300">/</span>

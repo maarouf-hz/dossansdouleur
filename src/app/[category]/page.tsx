@@ -6,6 +6,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
 import { CATEGORY_QUERY, categoryPostsCountQuery } from "@/lib/queries";
+import { BreadcrumbSchema } from "@/components/seo/JsonLd";
+import { generateCategoryMetadata } from "@/lib/seo";
+
+export async function generateMetadata({ params }: {params: Promise<{ category: string; post: string }>}) {
+  const { category: categorySlug } = await params;
+  const data = await client.fetch(CATEGORY_QUERY, { categorySlug });
+
+  return generateCategoryMetadata({
+    title: data.title,
+    description: data.headline,
+    slug: categorySlug,
+  });
+}
 
 const LIMIT = 9;
 
@@ -25,6 +38,7 @@ export default async function CategoryPage({
   const { category: categorySlug } = await params;
   const { page: pageParam } = await searchParams;
   const page = Number(pageParam || 1);
+
   if (page === 1 && pageParam !== undefined) {
     redirect(`/${categorySlug}`);
   }
@@ -51,7 +65,9 @@ export default async function CategoryPage({
 
   return (
     <main className="min-h-screen bg-white">
-      {/* HEADER */}
+      <BreadcrumbSchema
+        items={[{ name: data.title, url: `https://dossansdouleur.com/${categorySlug}` }]}
+      />
       <header className="border-b-8 border-black pt-24 pb-12 bg-slate-50">
         <div className="container mx-auto px-6 md:px-12">
           <nav className="mb-8 text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600">
@@ -77,7 +93,7 @@ export default async function CategoryPage({
               <Link
                 key={post.slug}
                 href={`/${categorySlug}/${post.slug}`}
-                className={`group flex flex-col ${isFeatured ? "md:col-span-12 lg:col-span-9 mb-12" : "md:col-span-6 lg:col-span-4"}`}
+                className={`group flex flex-col ${isFeatured ? "md:col-span-12 lg:col-span-12 mb-12" : "md:col-span-4 lg:col-span-3"}`}
               >
                 <article className={`${isFeatured ? "md:grid md:grid-cols-5 md:gap-12" : "flex flex-col"}`}>
                   <div className={`relative overflow-hidden bg-slate-100 mb-8 border border-slate-200 ${isFeatured ? "md:col-span-3 aspect-[16/10]" : "aspect-video"}`}>
@@ -98,15 +114,22 @@ export default async function CategoryPage({
                   </div>
 
                   <div className={isFeatured ? "md:col-span-2 flex flex-col justify-center" : ""}>
-                    <h2 className={`font-black uppercase tracking-tighter leading-[0.9] group-hover:text-emerald-700 transition-colors ${isFeatured ? "text-5xl md:text-7xl mb-8" : "text-3xl mb-4"}`}>
+                    <h2 className={`uppercase tracking-tighter leading-[0.9] group-hover:text-emerald-700 transition-colors ${isFeatured ? "font-black text-5xl md:text-7xl mb-8" : "text-lg mb-4 font-bold"}`}>
                       {post.title}
                     </h2>
-                    <p className="text-slate-600 text-base md:text-lg line-clamp-3 mb-8 leading-relaxed font-medium">
+                    <p className="text-sm text-slate-500 line-clamp-2">
                       {post.excerpt}
                     </p>
-                    <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      <span className="bg-black text-white px-2 py-1">{post.readingTime || 5} MIN</span>
-                      <span>{new Date(post.publishedAt).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}</span>
+                    <div className="pt-2 flex items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      <span>
+                        {new Date(post.publishedAt).toLocaleDateString("fr-FR", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <span className="mx-2">•</span>
+                      <span>{post.readingTime} min de lecture</span>
                     </div>
                   </div>
                 </article>
