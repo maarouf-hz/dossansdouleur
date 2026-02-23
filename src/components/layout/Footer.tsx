@@ -51,7 +51,7 @@ export default function Footer() {
           </div>
 
           {/* Section 4: Newsletter (Conversion) */}
-          <div className="bg-white p-6 border border-slate-200 shadow-sm">
+          {/* <div className="bg-white p-6 border border-slate-200 shadow-sm">
             <h4 className="font-bold text-sm uppercase mb-2">Guide Offert</h4>
             <p className="text-xs text-slate-500 mb-4 font-medium">Recevez nos 5 meilleurs exercices pour soulager vos lombaires.</p>
             <div className="flex flex-col gap-2">
@@ -64,7 +64,7 @@ export default function Footer() {
                 Rejoindre
               </Button>
             </div>
-          </div>
+          </div> */}
 
         </div>
 

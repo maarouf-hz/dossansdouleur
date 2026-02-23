@@ -44,14 +44,14 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
           <Button
             variant="default"
             className="rounded-none font-bold uppercase tracking-tighter px-6 bg-slate-900 hover:bg-emerald-700 text-white transition-all"
           >
             S'abonner
           </Button>
-        </div>
+        </div> */}
       </div>
     </header>
   );
