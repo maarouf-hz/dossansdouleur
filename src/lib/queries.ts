@@ -35,7 +35,7 @@ export const POST_QUERY = defineQuery(`
 
 export const categoryPostsCountQuery = defineQuery(
   `count(*[_type == "post" && references(*[_type == "category" && slug.current == $categorySlug][0]._id)])`
-)
+);
 
 export const CATEGORY_QUERY = `*[_type == "category" && slug.current == $categorySlug][0] {
   title,
@@ -52,8 +52,13 @@ export const CATEGORY_QUERY = `*[_type == "category" && slug.current == $categor
   }
 }`;
 
+export const CATEGORY_META_QUERY = `*[_type == "category" && slug.current == $categorySlug][0] {
+  title,
+  headline
+}`;
+
 export const heroImageQuery = `*[_type == "heroImage"][0] {
   image { asset->{ url }, hotspot, crop },
   alt,
   affiliateUrl
-}`
+}`;

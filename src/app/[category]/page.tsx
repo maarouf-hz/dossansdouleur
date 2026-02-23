@@ -1,21 +1,25 @@
 import { type SanityDocument } from "next-sanity";
-import imageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url";
 import { client } from "@/sanity/client";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound, redirect } from "next/navigation";
-import { CATEGORY_QUERY, categoryPostsCountQuery } from "@/lib/queries";
+import { CATEGORY_QUERY, CATEGORY_META_QUERY, categoryPostsCountQuery } from "@/lib/queries";
 import { BreadcrumbSchema } from "@/components/seo/JsonLd";
 import { generateCategoryMetadata } from "@/lib/seo";
 
-export async function generateMetadata({ params }: {params: Promise<{ category: string; post: string }>}) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ category: string }>;
+}) {
   const { category: categorySlug } = await params;
-  const data = await client.fetch(CATEGORY_QUERY, { categorySlug });
+  const data = await client.fetch(CATEGORY_META_QUERY, { categorySlug });
 
   return generateCategoryMetadata({
-    title: data.title,
-    description: data.headline,
+    title: data?.title ?? categorySlug,
+    description: data?.headline ?? "",
     slug: categorySlug,
   });
 }
@@ -25,7 +29,7 @@ const LIMIT = 9;
 const { projectId, dataset } = client.config();
 const urlFor = (source: SanityImageSource) =>
   projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    ? createImageUrlBuilder({ projectId, dataset }).image(source) // ✅ fixed
     : null;
 
 export default async function CategoryPage({
@@ -42,6 +46,7 @@ export default async function CategoryPage({
   if (page === 1 && pageParam !== undefined) {
     redirect(`/${categorySlug}`);
   }
+
   const start = (page - 1) * LIMIT;
   const end = start + LIMIT;
 
