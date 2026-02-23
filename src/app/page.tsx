@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { client } from "@/sanity/client";
 import { categoriesQuery, heroImageQuery, homeArticlesQuery } from "@/lib/queries";
-import imageUrlBuilder, { SanityImageSource } from "@sanity/image-url";
+import { createImageUrlBuilder, SanityImageSource } from "@sanity/image-url";
 import { HeroImageContent } from "@/components/ui/hero-image-content";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const { projectId, dataset } = client.config();
 const urlFor = (source: SanityImageSource) =>
   projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    ?createImageUrlBuilder({ projectId, dataset }).image(source)
     : null;
 
 async function getCategories() {

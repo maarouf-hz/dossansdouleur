@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dossansdouleur.com"),
   title: {
     default: "Dos Sans Douleur | Guide Expert de la Santé Vertébrale",
     template: "%s | Dos Sans Douleur"

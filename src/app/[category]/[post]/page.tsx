@@ -3,7 +3,7 @@ import { client } from "@/sanity/client";
 import Link from "next/link";
 import Image from "next/image";
 import { PortableText } from "next-sanity";
-import imageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url";
 import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/JsonLd";
 import { generateArticleMetadata } from "@/lib/seo";
@@ -29,7 +29,7 @@ const { projectId, dataset } = client.config();
 
 const urlFor = (source: SanityImageSource) =>
   projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    ? createImageUrlBuilder({ projectId, dataset }).image(source)
     : null;
 
 export const revalidate = 60;
