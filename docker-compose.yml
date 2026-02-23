@@ -1,13 +1,12 @@
-version: '3.8'
-
+version: "3.8"
 
 services:
-  web:
+  dossansdouleur_wp:
+    container_name: dossansdouleur_wp
     build: .
+    restart: always
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
     environment:
-      - WATCHPACK_POLLING=true
+      NODE_ENV: production
+      
